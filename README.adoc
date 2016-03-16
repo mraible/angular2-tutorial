@@ -1,0 +1,519 @@
+= Getting Started with Angular 2
+
+:author: Matt Raible
+:email:  matt@raibledesigns.com
+:revnumber: 1.0
+:revdate:   {docdate}
+:subject: Angular 2
+:keywords: Angular 2, JavaScript, TypeScript, npm, gulp, RxJS
+:doctype: book
+:toc: macro
+:icons: font
+:lang: en
+:language: javadocript
+:sourcedir: .
+
+This is an application I built to help myself learn Angular 2. I tried to keep the functionality and features similar
+to http://raibledesigns.com/rd/entry/getting_started_with_angularjs[Getting Started with AngularJS] and
+http://raibledesigns.com/rd/entry/testing_angularjs_applications[Testing AngularJS Applications] so you can
+compare https://github.com/mraible/angular-tutorial[the code] between the two.
+
+toc::[]
+
+== What you'll build
+
+You'll build a simple web application with Angular 2 and TypeScript. You'll add search and edit features with mock data.
+
+== What you'll need
+
+* About 15-30 minutes
+* A favorite text editor or IDE. I recommend https://www.jetbrains.com/idea/[IntelliJ IDEA].
+* http://git-scm.com/[Git] installed.
+* http://nodejs.org/[Node.js] and NPM installed. I recommend using https://github.com/creationix/nvm[nvm].
+
+== Create your project
+
+Clone the angular2-seed repository using git:
+
+----
+git clone https://github.com/mgechev/angular2-seed.git angular2-tutorial
+cd angular2-tutorial
+----
+
+[NOTE]
+====
+The seed project requires node v4.x.x or higher and npm 2.14.7. I used node v4.2.6 and npm 3.6.0.
+====
+
+Install `ts-node` for TypeScript:
+
+----
+npm install -g ts-node
+----
+
+Install the project's dependencies:
+
+----
+npm install
+npm start
+----
+
+== Run the application
+
+The project is configured with a simple web server for development. To start it, run:
+
+----
+npm start
+----
+
+You should see a screen like the one below at http://localhost:5555.
+
+[[default-homepage]]
+.Default homepage
+image::src/assets/images/default-homepage.png[Default Homepage, 800, scaledwidth="100%"]
+
+You can see your new project's test coverage by running `npm test`:
+
+[source]
+----
+=============================== Coverage summary ===============================
+Statements   : 86.11% ( 93/108 )
+Branches     : 48.28% ( 70/145 )
+Functions    : 100% ( 25/25 )
+Lines        : 94.32% ( 83/88 )
+================================================================================
+----
+
+== Add a search feature
+
+To add a search feature, open the project in an IDE or your favorite text editor. For IntelliJ IDEA, use
+File > New Project > Static Web and point to the directory you cloned angular2-seed to.
+
+=== The Basics
+
+Create a file at `src/search/components/search.component.html` with the following HTML:
+
+[source,xml]
+.src/search/components/search.component.html
+----
+<h2>Search</h2>
+<form>
+  <input type="search" [(ngModel)]="query" (keyup.enter)="search()">
+  <button type="button" (click)="search()">Search</button>
+</form>
+<div *ngIf="loading">loading...</div>
+<pre>{{searchResults | json}}</pre>
+----
+
+Create `src/search/components/search.component.ts` to define the `SearchComponent` and point to this template.
+
+[source,js]
+.src/search/components/search.component.ts
+----
+import {Component} from 'angular2/core';
+import {CORE_DIRECTIVES, FORM_DIRECTIVES} from 'angular2/common';
+import {ROUTER_DIRECTIVES, RouteParams} from 'angular2/router';
+
+@Component({
+  selector: 'sd-search',
+  moduleId: module.id,
+  templateUrl: './search.component.html',
+  directives: [FORM_DIRECTIVES, CORE_DIRECTIVES, ROUTER_DIRECTIVES]
+})
+export class SearchComponent {
+  loading: boolean;
+  query: string;
+  searchResults: any;
+
+  constructor() {
+    console.log('initialized search component');
+  }
+}
+----
+
+Update `src/app/components/app.component.ts` to import this component and include its route.
+
+[source,javascript,linenum]
+.src/app/components/app.component.ts
+----
+include::{sourcedir}/src/app/components/app.component.ts[lines=7]
+
+include::{sourcedir}/src/app/components/app.component.ts[lines=19..22]
+----
+
+Your browser should refresh automatically, thanks to http://browsersync.io[Browsersync]. Navigate to
+http://localhost:5555/search and you should see the search component.
+
+[[search-component]]
+.Search component
+image::src/assets/images/search-without-css.png[Search component, 800, scaledwidth="100%"]
+
+You can see it needs a bit of styling. Angular 2 allows you to provide styles specific for your component using a `styleUrls` property on your component.
+Add this property as you see below.
+
+[source,javascript]
+.src/search/components/search.component.ts
+----
+templateUrl: './search.component.html',
+styleUrls: ['./search.component.css'],
+directives: [FORM_DIRECTIVES, CORE_DIRECTIVES, ROUTER_DIRECTIVES]
+----
+
+Create `src/search/components/search.component.css` and add some CSS.
+
+[source,css]
+.src/search/components/search.component.css
+----
+include::{sourcedir}/src/search/components/search.component.css[lines=1..4]
+----
+
+There, that looks better!
+
+.Search component with styling
+image::src/assets/images/search-with-css.png[Search component with styling, 800, scaledwidth="100%"]
+
+Finally, update `src/app/components/navbar.component.html` to include a link to the search route.
+
+[source,xml]
+.src/app/components/navbar.component.html
+----
+include::{sourcedir}/src/app/components/navbar.component.html[]
+----
+
+This section has shown you how to add a new component to a basic Angular 2 application.
+The next section shows you how to create a use a JSON file and `localStorage` to create a fake API.
+
+=== The Backend
+
+To get search results, create a `SearchService` that makes HTTP requests to a JSON file. Start
+by creating `people.json` to hold our data.
+
+[source,json]
+.src/shared/data/people.json
+----
+include::{sourcedir}/src/shared/data/people.json[]
+----
+
+Create `src/shared/services/search.service.ts` and provide `Http` as a dependency in its constructor.
+In this same file, define the `Address` and `Person` classes that JSON will be marshalled to.
+
+[source,javascript]
+.src/shared/services/search.service.ts
+----
+import {Injectable} from 'angular2/core';
+import {Http, Response} from 'angular2/http';
+
+@Injectable()
+export class SearchService {
+  constructor(private http:Http) {}
+
+  getAll() {
+    return this.http.get('shared/data/people.json').map((res:Response) => res.json());
+  }
+}
+
+export class Address {
+  street:string;
+  city:string;
+  state:string;
+  zip:string;
+
+  constructor(obj?:any) {
+    this.street = obj && obj.street || null;
+    this.city = obj && obj.city || null;
+    this.state = obj && obj.state || null;
+    this.zip = obj && obj.zip || null;
+  }
+}
+
+export class Person {
+  id:number;
+  name:string;
+  phone:string;
+  address:Address;
+
+  constructor(obj?:any) {
+    this.id = obj && Number(obj.id) || null;
+    this.name = obj && obj.name || null;
+    this.phone = obj && obj.phone || null;
+    this.address = obj && obj.address || null;
+  }
+}
+----
+
+In `SearchComponent`, add imports for these classes.
+
+[source,javascript]
+.src/search/components/search.component.ts
+----
+import {Person, SearchService} from '../../shared/services/search.service';
+----
+
+You can now add a type to the searchResults variable. While you're there, modify the constructor to inject the `SearchService`.
+
+[source,javascript]
+.src/search/components/search.component.ts
+----
+searchResults: Array<Person>;
+
+constructor(public searchService: SearchService) {}
+----
+
+Then implement the `search()` method to call the service's `getAll()` method.
+
+[source,javascript]
+.src/search/components/search.component.ts
+----
+search(): void {
+  this.searchService.getAll().subscribe(
+    data => {this.searchResults = data;},
+    error => console.log(error)
+  );
+}
+----
+
+At this point, you'll likely see the following message in your browser's console.
+
+----
+EXCEPTION: No provider for SearchService! (SearchComponent -> SearchService)
+----
+
+This happens because the app hasn't provided this service to components. To fix this, modify
+`app.component.ts` to import this component and add the service to the list of providers.
+
+[source,javascript]
+.src/app/components/app.component.ts
+----
+import {NameListService} from '../../shared/services/name-list.service';
+import {SearchService} from '../../shared/services/search.service';
+
+@Component({
+  selector: 'sd-app',
+  viewProviders: [NameListService, SearchService],
+  moduleId: module.id,
+----
+
+Next, you'll likely get an error about the `Http` dependency in `SearchService`.
+
+----
+EXCEPTION: No provider for Http! (SearchComponent -> SearchService -> Http)
+----
+
+To solve this problem, modify `src/main.ts` to import the `Http` service and make it
+available to the app.
+
+[source,javascript]
+.src/main.ts
+----
+import {HTTP_PROVIDERS} from 'angular2/http';
+
+bootstrap(AppComponent, [
+  HTTP_PROVIDERS, ROUTER_PROVIDERS,
+  provide(APP_BASE_HREF, { useValue: '<%= APP_BASE %>' })
+]);
+----
+
+Now the page will load without errors. However, when you click on the button, you'll see the following error.
+
+----
+ORIGINAL EXCEPTION: TypeError: this.http.get(...).map is not a function
+----
+
+I was stuck here for quite some time when I first encountered this issue. I was able to solve it
+with a simple import in `main.ts`.
+
+[source,javascript]
+.src/main.ts
+----
+import 'rxjs/add/operator/map';
+----
+
+Now clicking the search button should work. To make the results look better,
+remove the `<pre>` tag and replace it with a `<table>`.
+
+[source,xml]
+.src/search/components/search.component.html
+----
+<table *ngIf="searchResults">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Phone</th>
+    <th>Address</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="#person of searchResults; #i=index">
+    <td>{{person.name}}</td>
+    <td>{{person.phone}}</td>
+    <td>{{person.address.street}}<br/>
+      {{person.address.city}}, {{person.address.state}} {{person.address.zip}}
+    </td>
+  </tr>
+  </tbody>
+</table>
+----
+
+Then add some additional CSS for this component.
+
+[source,css]
+.src/search/components/search.component.css
+----
+include::{sourcedir}/src/search/components/search.component.css[lines=6..20]
+----
+
+Now the search results look better.
+
+[[search-results]]
+.Search results
+image::src/assets/images/search-results.png[Search Results, 800, scaledwidth="100%"]
+
+But wait, we still don't have search functionality! To add a search feature, add a `search()` method to `SearchService`.
+
+[source,javascript]
+.src/shared/services/search.service.ts
+----
+search(q:string) {
+  if (!q || q === '*') {
+    q = '';
+  } else {
+    q = q.toLowerCase();
+  }
+  return this.getAll().map(data => {
+    let results = [];
+    data.map(item => {
+      if (JSON.stringify(item).toLowerCase().includes(q)) {
+        results.push(item);
+      }
+    });
+    return results;
+  });
+}
+----
+
+Then refactor `SearchComponent` to call this method with its `query` variable.
+
+[source,javascript]
+.src/search/components/search.component.ts
+----
+include::{sourcedir}/src/search/components/search.component.ts[lines=25..30]
+----
+
+Now search results will be filtered by the query value you type in.
+
+This section showed you how to fetch and display search results. The next section builds on this and shows how to edit and save a record.
+
+=== Add an edit feature
+
+Modify `search.component.html` to add a link for editing a person.
+
+[source,html]
+.src/search/components/search.component.html
+----
+include::{sourcedir}/src/search/components/search.component.html[lines=18]
+----
+
+Create `src/search/components/edit.component.html` to display an editable form. You might notice I've added `id` attributes to most elements. This is to
+make things easier when writing integration tests with Protractor.
+
+[source,html]
+.src/search/components/edit.component.html
+----
+include::{sourcedir}/src/search/components/edit.component.html[]
+----
+
+Create an `EditComponent` that references this template and handles communication with the `SearchService`.
+
+[source,javascript]
+.src/search/components/edit.component.ts
+----
+include::{sourcedir}/src/search/components/edit.component.ts[]
+----
+
+Modify `SearchService` to contain functions for finding a person by their id, and saving them. While you're in there, modify the `search()` method to
+be aware of updated objects in `localStorage`.
+
+[source,javascript]
+.src/shared/services/search.service.ts
+----
+include::{sourcedir}/src/shared/services/search.service.ts[lines=12..44]
+----
+
+To make the app are of this new component, add an import and route configuration in `app.component.ts`.
+
+[source,javascript]
+----
+import {EditComponent} from '../../search/components/edit.component';
+
+@RouteConfig([
+  { path: '/',      name: 'Home',  component: HomeComponent  },
+  { path: '/about', name: 'About', component: AboutComponent },
+  { path: '/search', name: 'Search', component: SearchComponent },
+  { path: '/edit/:id', name: 'Edit', component: EditComponent }
+])
+----
+
+Then create `src/search/components/edit.component.css` to make the form look a bit better.
+
+[source,css]
+.src/search/components/edit.component.css
+----
+include::{sourcedir}/src/search/components/edit.component.css[]
+----
+
+At this point, you should be able to search for a person and update their information.
+
+[[edit-form]]
+.Edit component
+image::src/assets/images/edit-form.png[Edit form, 800, scaledwidth="100%"]
+
+The &lt;form> in `src/search/components/edit.component.html` calls a `save()` function to update a person's data. You already implemented this above.
+The function calls a `gotoList()` function that appends the person's name to the URL when sending the user back to the search screen.
+
+[source,javascript]
+.src/search/components/edit.component.ts
+----
+include::{sourcedir}/src/search/components/edit.component.ts[lines=60..66]
+----
+
+Since the `SearchComponent` doesn't execute a search automatically when you execute this URL, add the following logic to do so in its constructor.
+
+[source,javascript]
+.src/search/components/search.component.ts
+----
+  constructor(public searchService: SearchService, params: RouteParams) {
+    if (params.get('term')) {
+      this.query = decodeURIComponent(params.get('term'));
+      this.search();
+    }
+  }
+----
+
+You'll need to import `RouteParams` in order for everything to compile.
+
+[source,javascript]
+.src/search/components/search.component.ts
+----
+import {ROUTER_DIRECTIVES, RouteParams} from 'angular2/router';
+----
+
+After making all these changes, you should be able to search/edit/update a person's information. If it works - nice job!
+
+=== Source code
+
+A completed project with this code in it is available on GitHub at https://github.com/mraible/angular2-tutorial.
+
+=== Resources
+
+I used a number of resources while creating this application. https://www.ng-book.com/2/[ng-book 2] was an invaluable resource
+and I highly recommend it if you're learning Angular 2. I also found Chariot Solution's article on
+http://chariotsolutions.com/blog/post/angular2-observables-http-separating-services-components/'
+[Angular2 Observables, Http, and separating services and components] to be quite helpful.
+
+Also, kudos to all the pioneers in Angular 2 land that've been using it and writing about it on blogs and Stack Overflow.
+Getting started with Angular 2 would've been a real pain without your trailblazing.
+
+=== Summary
+
+I hope you've enjoyed this quick-and-easy tutorial on how to get started with Angular 2. In a future tutorial,
+I'll show you how to write unit tests and integration tests for this application.
