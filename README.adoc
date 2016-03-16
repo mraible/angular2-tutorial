@@ -507,8 +507,7 @@ A completed project with this code in it is available on GitHub at https://githu
 
 I used a number of resources while creating this application. https://www.ng-book.com/2/[ng-book 2] was an invaluable resource
 and I highly recommend it if you're learning Angular 2. I also found Chariot Solution's article on
-http://chariotsolutions.com/blog/post/angular2-observables-http-separating-services-components/'
-[Angular2 Observables, Http, and separating services and components] to be quite helpful.
+http://chariotsolutions.com/blog/post/angular2-observables-http-separating-services-components/[Angular2 Observables, Http, and separating services and components] to be quite helpful.
 
 Also, kudos to all the pioneers in Angular 2 land that've been using it and writing about it on blogs and Stack Overflow.
 Getting started with Angular 2 would've been a real pain without your trailblazing.
