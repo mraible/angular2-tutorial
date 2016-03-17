@@ -499,20 +499,22 @@ import {ROUTER_DIRECTIVES, RouteParams} from 'angular2/router';
 
 After making all these changes, you should be able to search/edit/update a person's information. If it works - nice job!
 
-=== Source code
+== Source code
 
 A completed project with this code in it is available on GitHub at https://github.com/mraible/angular2-tutorial.
+
+== Summary
+
+I hope you've enjoyed this quick-and-easy tutorial on how to get started with Angular 2. In a future tutorial,
+I'll show you how to write unit tests and integration tests for this application.
 
 === Resources
 
 I used a number of resources while creating this application. https://www.ng-book.com/2/[ng-book 2] was an invaluable resource
-and I highly recommend it if you're learning Angular 2. I also found Chariot Solution's article on
-http://chariotsolutions.com/blog/post/angular2-observables-http-separating-services-components/[Angular2 Observables, Http, and separating services and components] to be quite helpful.
+and I highly recommend it if you're learning Angular 2. I found Chariot Solution's article on
+http://chariotsolutions.com/blog/post/angular2-observables-http-separating-services-components/[Angular2 Observables, Http, and separating services and components]
+to be quite helpful. Finally, the https://github.com/angular/angular-cli[angular-cli] project was a big help, especially its
+`ng generate route <object>` feature.
 
-Also, kudos to all the pioneers in Angular 2 land that've been using it and writing about it on blogs and Stack Overflow.
+Kudos to all the pioneers in Angular 2 land that've been using it and writing about it on blogs and Stack Overflow.
 Getting started with Angular 2 would've been a real pain without your trailblazing.
-
-=== Summary
-
-I hope you've enjoyed this quick-and-easy tutorial on how to get started with Angular 2. In a future tutorial,
-I'll show you how to write unit tests and integration tests for this application.
