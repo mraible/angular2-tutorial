@@ -55,7 +55,6 @@ Install the project's dependencies:
 
 ----
 npm install
-npm start
 ----
 
 == Run the application
@@ -133,7 +132,7 @@ export class SearchComponent {
 
 Update `src/app/components/app.component.ts` to import this component and include its route.
 
-[source,javascript,linenum]
+[source,javascript]
 .src/app/components/app.component.ts
 ----
 include::{sourcedir}/src/app/components/app.component.ts[lines=7]
