@@ -29,10 +29,10 @@ This manual testing will take longer and longer as your codebase grows.
 
 == What you'll need
 
-* About 15-30 minutes
+* About 15-30 minutes.
 * A favorite text editor or IDE. I recommend https://www.jetbrains.com/idea/[IntelliJ IDEA].
 * http://git-scm.com/[Git] installed.
-* http://nodejs.org/[Node.js] and NPM installed. I recommend using https://github.com/creationix/nvm[nvm].
+* http://nodejs.org/[Node.js] and npm installed. I recommend using https://github.com/creationix/nvm[nvm].
 
 == Get the tutorial project
 
