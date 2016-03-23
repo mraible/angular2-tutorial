@@ -33,7 +33,7 @@ You'll build a simple web application with Angular 2 and TypeScript. You'll add 
 
 == Create your project
 
-Clone the angular2-seed repository using git:
+Clone the https://github.com/mgechev/angular2-seed[angular2-seed] repository using git:
 
 ----
 git clone https://github.com/mgechev/angular2-seed.git angular2-tutorial
