@@ -185,7 +185,7 @@ The next section shows you how to create a use a JSON file and `localStorage` to
 === The Backend
 
 To get search results, create a `SearchService` that makes HTTP requests to a JSON file. Start
-by creating `people.json` to hold our data.
+by creating `people.json` to hold your data.
 
 [source,json]
 .src/shared/data/people.json
@@ -240,7 +240,7 @@ export class Person {
 }
 ----
 
-In `SearchComponent`, add imports for these classes.
+In `search.component.ts`, add imports for these classes.
 
 [source,javascript]
 .src/search/components/search.component.ts
@@ -248,7 +248,7 @@ In `SearchComponent`, add imports for these classes.
 import {Person, SearchService} from '../../shared/services/search.service';
 ----
 
-You can now add a type to the searchResults variable. While you're there, modify the constructor to inject the `SearchService`.
+You can now add a type to the `searchResults` variable. While you're there, modify the constructor to inject the `SearchService`.
 
 [source,javascript]
 .src/search/components/search.component.ts
@@ -402,7 +402,7 @@ Now search results will be filtered by the query value you type in.
 
 This section showed you how to fetch and display search results. The next section builds on this and shows how to edit and save a record.
 
-=== Add an edit feature
+== Add an edit feature
 
 Modify `search.component.html` to add a link for editing a person.
 
