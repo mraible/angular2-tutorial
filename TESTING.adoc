@@ -36,7 +36,7 @@ This manual testing will take longer and longer as your codebase grows.
 
 == Get the tutorial project
 
-Clone the angular2-tutorial repository using git and install its dependencies.
+Clone the https://github.com/mraible/angular2-tutorial[angular2-tutorial repository] using git and install its dependencies.
 
 ----
 git clone https://github.com/mraible/angular2-tutorial.git
