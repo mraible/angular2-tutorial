@@ -224,7 +224,7 @@ You should receive an error stating that the "nav text for About" is incorrect.
 .Protractor nav test error
 image::src/assets/images/protractor-nav-error.png[Protractor nav test error, 800, scaledwidth="100%"]
 
-This happens because we added a 'Search' link to the navbar and didn't update the test that looks for the last child.
+This happens because we added a Search link to the navbar and didn't update the test that looks for the last child.
 
 [source,javascript]
 .src/app/components/app.component.e2e.ts
