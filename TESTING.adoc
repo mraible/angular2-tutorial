@@ -45,7 +45,7 @@ npm install
 ----
 
 If you haven't completed the link:README.adoc[Getting Started with Angular 2] tutorial, you should peruse it so you understand how this application works.
-You can also simply start the app with "npm start" and view it in your browser at http://localhost:5555/.
+You can also simply start the app with `npm start` and view it in your browser at http://localhost:5555/.
 
 == Unit test the SearchService
 
@@ -78,8 +78,8 @@ export function main() {
 }
 ----
 
-If you run `npm test`, you'll get a failed build from a number of unused imports. Let's fix those by adding the first test of `getAll()`. You can see
-how the `MockBackend` is used to mock results and set the response.
+If you run `npm test`, you'll get a failed build from a number of unused imports. You can fix those by adding the first test of `getAll()`. This test shows how
+`MockBackend` can be used to mock results and set the response.
 
 When you are testing code that returns either a Promise or an RxJS Observable, you can use the `fakeAsync` helper to test that code as if it were synchronous.
 Promises are be fulfilled and Observables are notified immediately after you call `tick()`.
@@ -106,7 +106,7 @@ it('should retrieve all search results',
 );
 ----
 
-Running `npm test` should result in "10 tests completed". Add couple more tests for filtering by search term and fetching by id.
+Running `npm test` should result in "10 tests completed". Add a couple more tests for filtering by search term and fetching by id.
 
 [source,javascript]
 .src/shared/services/search.service.spec.ts
@@ -282,8 +282,8 @@ A completed project with this code is available on GitHub at https://github.com/
 == Summary
 
 I hope you've enjoyed this quick-and-easy tutorial on testing Angular 2 applications. You can see the test coverage of your project by running
-`npm run serve.coverage`. You'll notice that our new components and service could use some additional coverage. I'll leave that as a task
-for the reader. Please send a pull request to https://github.com/mraible/angular2-tutorial[this project] if you're ambitious.
+`npm run serve.coverage`. You'll notice that the new components and service could use some additional coverage. I'll leave that as a task
+for the reader. Please send a pull request if you're feeling ambitious.
 
 [[test-coverage]]
 .Test coverage
