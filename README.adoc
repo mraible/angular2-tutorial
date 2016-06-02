@@ -287,7 +287,7 @@ This happens because the app hasn't provided this service to components. To fix 
  * This barrel file provides the export for the shared SearchService.
  */
 export * from './search.service';
----
+----
 
 Then add a reference to this file in `src/client/app/shared/index.ts` so its included in the
 shared export.
@@ -296,7 +296,7 @@ shared export.
 .src/client/app/shared/index.ts
 ----
 include::{sourcedir}/src/client/app/shared/index.ts[]
----
+----
 
 To fix the "No provider" error from above, update `app.component.ts` to import the `SearchService`
 and add the service to the list of providers.
@@ -318,7 +318,7 @@ Next, you'll likely get an error about the `Http` dependency in `SearchService`.
 EXCEPTION: No provider for Http! (SearchComponent -> SearchService -> Http)
 ----
 
-To solve this problem, modify `src/main.ts` to import the `Http` service and make it
+To solve this, modify `src/main.ts` to import the `Http` service and make it
 available to the app.
 
 [source,javascript]
