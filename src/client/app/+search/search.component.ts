@@ -1,7 +1,7 @@
-import {Component} from '@angular/core';
-import {CORE_DIRECTIVES, FORM_DIRECTIVES} from '@angular/common';
-import {ROUTER_DIRECTIVES, RouteSegment} from '@angular/router';
-import {Person, SearchService} from '../shared/search/search.service';
+import { Component } from '@angular/core';
+import { CORE_DIRECTIVES, FORM_DIRECTIVES } from '@angular/common';
+import { ROUTER_DIRECTIVES, RouteSegment } from '@angular/router';
+import { Person, SearchService } from '../shared/index';
 
 @Component({
   selector: 'sd-search',
@@ -15,12 +15,6 @@ export class SearchComponent {
   query: string;
   searchResults: Array<Person>;
 
-  /*
-   routerOnActivate(curr: RouteSegment) {
-   this.userName = curr.getParam('userName');
-   this.projId = curr.getParam('projId');
-   }
-   */
   constructor(public searchService: SearchService, routeSegment: RouteSegment) {
     if (routeSegment.getParam('term')) {
       this.query = decodeURIComponent(routeSegment.getParam('term'));

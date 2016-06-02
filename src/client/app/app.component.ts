@@ -21,21 +21,9 @@ import { NameListService, NavbarComponent, ToolbarComponent, SearchService } fro
   directives: [ROUTER_DIRECTIVES, NavbarComponent, ToolbarComponent]
 })
 @Routes([
-  {
-    path: '/',
-    component: HomeComponent
-  },
-  {
-    path: '/about',
-    component: AboutComponent
-  },
-  {
-    path: '/search',
-    component: SearchComponent
-  },
-  {
-    path: '/edit/:id',
-    component: EditComponent
-  }
+  { path: '/', component: HomeComponent },
+  { path: '/about', component: AboutComponent },
+  { path: '/search', component: SearchComponent },
+  { path: '/edit/:id', component: EditComponent }
 ])
 export class AppComponent {}
