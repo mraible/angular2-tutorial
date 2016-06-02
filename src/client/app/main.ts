@@ -2,9 +2,7 @@ import { APP_BASE_HREF } from '@angular/common';
 import { enableProdMode, provide } from '@angular/core';
 import { bootstrap } from '@angular/platform-browser-dynamic';
 import { ROUTER_PROVIDERS } from '@angular/router';
-import { HTTP_PROVIDERS } from '@angular/http';
 import { AppComponent } from './app.component';
-import 'rxjs/add/operator/map';
 
 if ('<%= ENV %>' === 'prod') { enableProdMode(); }
 
@@ -13,7 +11,7 @@ if ('<%= ENV %>' === 'prod') { enableProdMode(); }
  * @see https://angular.io/docs/ts/latest/api/platform-browser-dynamic/index/bootstrap-function.html
  */
 bootstrap(AppComponent, [
-  HTTP_PROVIDERS, ROUTER_PROVIDERS,
+  ROUTER_PROVIDERS,
   provide(APP_BASE_HREF, { useValue: '<%= APP_BASE %>' })
 ]);
 

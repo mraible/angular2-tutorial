@@ -42,14 +42,8 @@ cd angular2-tutorial
 
 [NOTE]
 ====
-The seed project requires node v4.x.x or higher and npm 2.14.7. I used node v4.2.6 and npm 3.6.0.
+The seed project requires node v4.x.x or higher and npm 2.14.7. I used node v4.2.6 and npm 3.9.3.
 ====
-
-Install `ts-node` for TypeScript:
-
-----
-npm install -g ts-node
-----
 
 Install the project's dependencies:
 
@@ -76,10 +70,10 @@ You can see your new project's test coverage by running `npm test`:
 [source]
 ----
 =============================== Coverage summary ===============================
-Statements   : 86.11% ( 93/108 )
-Branches     : 48.28% ( 70/145 )
-Functions    : 100% ( 25/25 )
-Lines        : 94.32% ( 83/88 )
+Statements   : 96.36% ( 159/165 )
+Branches     : 62.5% ( 120/192 )
+Functions    : 100% ( 35/35 )
+Lines        : 100% ( 129/129 )
 ================================================================================
 ----
 
@@ -90,7 +84,9 @@ File > New Project > Static Web and point to the directory you cloned angular2-s
 
 === The Basics
 
-Create a file at `src/client/app/+search/search.component.html` with the following HTML:
+Create a `src/client/app/+search` folder and a `search.component.html` file in it. The + prefix is an indicator
+to Angular that you want to lazy-load the components in this directory. Populate the HTML file you created with
+the following:
 
 [source,xml]
 .src/client/app/+search/search.component.html
@@ -130,14 +126,28 @@ export class SearchComponent {
 }
 ----
 
+Create `src/client/app/+search/index.ts` to export `SearchComponent`.
+
+[source,javascript]
+----
+/**
+ * This barrel file provides the export for the lazy loaded SearchComponent.
+ */
+export * from './search.component';
+----
+
 Update `src/client/app/app.component.ts` to import this component and include its route.
 
 [source,javascript]
 .src/client/app/app.component.ts
 ----
-include::{sourcedir}/src/client/app/app.component.ts[lines=7]
+import { SearchComponent } from './+search/index';
 
-include::{sourcedir}/src/client/app/app.component.ts[lines=23..26]
+@Routes([
+  { path: '/', component: HomeComponent },
+  { path: '/about', component: AboutComponent },
+  { path: '/search', component: SearchComponent }
+])
 ----
 
 Your browser should refresh automatically, thanks to http://browsersync.io[Browsersync]. Navigate to
@@ -245,7 +255,7 @@ In `search.component.ts`, add imports for these classes.
 [source,javascript]
 .src/client/app/+search/search.component.ts
 ----
-import { Person, SearchService } from '../shared/search/search.service';
+import { Person, SearchService } from '../shared/index';
 ----
 
 You can now add a type to the `searchResults` variable. While you're there, modify the constructor to inject the `SearchService`.
@@ -274,7 +284,7 @@ search(): void {
 At this point, you'll likely see the following message in your browser's console.
 
 ----
-EXCEPTION: No provider for SearchService! (SearchComponent -> SearchService)
+ORIGINAL EXCEPTION: No provider for SearchService!
 ----
 
 This happens because the app hasn't provided this service to components. To fix this, create
@@ -310,41 +320,6 @@ import { NameListService, NavbarComponent, ToolbarComponent, SearchService } fro
   selector: 'sd-app',
   viewProviders: [NameListService, SearchService, HTTP_PROVIDERS]
   moduleId: module.id,
-----
-
-Next, you'll likely get an error about the `Http` dependency in `SearchService`.
-
-----
-EXCEPTION: No provider for Http! (SearchComponent -> SearchService -> Http)
-----
-
-To solve this, modify `src/main.ts` to import the `Http` service and make it
-available to the app.
-
-[source,javascript]
-.src/client/app/main.ts
-----
-import { HTTP_PROVIDERS } from '@angular/http';
-
-bootstrap(AppComponent, [
-  HTTP_PROVIDERS, ROUTER_PROVIDERS,
-  provide(APP_BASE_HREF, { useValue: '<%= APP_BASE %>' })
-]);
-----
-
-Now the page will load without errors. However, when you click on the button, you'll see the following error.
-
-----
-ORIGINAL EXCEPTION: TypeError: this.http.get(...).map is not a function
-----
-
-I was stuck here for quite some time when I first encountered this issue. I was able to solve it
-with a simple import in `main.ts`.
-
-[source,javascript]
-.src/client/app/main.ts
-----
-import 'rxjs/add/operator/map';
 ----
 
 Now clicking the search button should work. To make the results look better,
@@ -447,6 +422,16 @@ Create an `EditComponent` that references this template and handles communicatio
 .src/client/app/+edit/edit.component.ts
 ----
 include::{sourcedir}/src/client/app/+edit/edit.component.ts[]
+----
+
+Create `src/client/app/+edit/index.ts` to export `EditComponent`.
+
+[source,javascript]
+----
+/**
+ * This barrel file provides the export for the lazy loaded SearchComponent.
+ */
+export * from './edit.component';
 ----
 
 Modify `SearchService` to contain functions for finding a person by their id, and saving them. While you're in there, modify the `search()` method to

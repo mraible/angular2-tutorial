@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Person, Address, SearchService } from '../shared/search/search.service';
+import { Person, Address, SearchService } from '../shared/index';
 import { RouteSegment, Router } from '@angular/router';
 
 @Component({
