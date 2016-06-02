@@ -1,4 +1,4 @@
 /**
- * This barrel file provides the export for the shared NameListService.
+ * This barrel file provides the export for the shared SearchService.
  */
-export * from './name-list.service';
+export * from './search.service';

@@ -1,5 +1,5 @@
 /**
- * This barrel file provides the export for the lazy loaded EditComponent.
+ * This barrel file provides the export for the lazy loaded SearchComponent.
  */
-export * from './edit.component';
+export * from './search.component';
 

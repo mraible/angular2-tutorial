@@ -19,7 +19,7 @@ class MockResponse extends Response {
 export class TestHelper {
   /** Gets a child DebugElement by tag name. */
   static getChildByTagName(parent: DebugElement, tagName: string): DebugElement {
-    return parent.query(debugEl => debugEl.nativeElement.tagName.toLowerCase() == tagName);
+    return parent.query(debugEl => debugEl.nativeElement.tagName.toLowerCase() === tagName);
   }
 
   /**
@@ -61,6 +61,18 @@ export interface GuinessCompatibleSpy extends jasmine.Spy {
 }
 
 export class SpyObject {
+  static stub(object = null, config = null, overrides = null) {
+    if (!(object instanceof SpyObject)) {
+      overrides = config;
+      config = object;
+      object = new SpyObject();
+    }
+
+    var m = StringMapWrapper.merge(config, overrides);
+    StringMapWrapper.forEach(m, (value, key) => { object.spy(key).andReturn(value); });
+    return object;
+  }
+
   constructor(type = null) {
     if (type) {
       for (var prop in type.prototype) {
@@ -80,7 +92,7 @@ export class SpyObject {
     }
   }
   // Noop so that SpyObject has the same interface as in Dart
-  noSuchMethod(args) {}
+  //noSuchMethod(args) {}
 
   spy(name) {
     if (!this[name]) {
@@ -90,18 +102,6 @@ export class SpyObject {
   }
 
   prop(name, value) { this[name] = value; }
-
-  static stub(object = null, config = null, overrides = null) {
-    if (!(object instanceof SpyObject)) {
-      overrides = config;
-      config = object;
-      object = new SpyObject();
-    }
-
-    var m = StringMapWrapper.merge(config, overrides);
-    StringMapWrapper.forEach(m, (value, key) => { object.spy(key).andReturn(value); });
-    return object;
-  }
 
   /** @internal */
   _createGuinnessCompatibleSpy(name): GuinessCompatibleSpy {

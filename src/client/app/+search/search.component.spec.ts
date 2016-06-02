@@ -1,32 +1,36 @@
+import { provide } from '@angular/core';
+import { TestComponentBuilder } from '@angular/compiler/testing';
 import {
   it,
   describe,
   expect,
-  injectAsync,
+  inject,
   beforeEachProviders,
-  TestComponentBuilder,
-} from 'angular2/testing';
+} from '@angular/core/testing';
 
-import {MockRouterProvider} from '../../shared/services/mocks/routes';
-import {MockSearchService} from '../../shared/services/mocks/search.service';
+import { RouteSegment } from '@angular/router';
+import { ROUTER_FAKE_PROVIDERS } from '@angular/router/testing';
+import { MockRouteSegment } from '../shared/search/mocks/routes';
+import { MockSearchService } from '../shared/search/mocks/search.service';
 
-import {SearchComponent} from './search.component';
+import { SearchComponent } from './search.component';
 
 export function main() {
   describe('Search component', () => {
     var mockSearchService:MockSearchService;
-    var mockRouterProvider:MockRouterProvider;
 
     beforeEachProviders(() => {
       mockSearchService = new MockSearchService();
-      mockRouterProvider = new MockRouterProvider();
 
       return [
-        mockSearchService.getProviders(), mockRouterProvider.getProviders()
+        mockSearchService.getProviders(),
+        ROUTER_FAKE_PROVIDERS,
+        SearchComponent,
+        provide(RouteSegment, { useValue: new MockRouteSegment({ 'term': 'peyton' }) })
       ];
     });
 
-    it('should search when a term is set and search() is called', injectAsync([TestComponentBuilder], (tcb:TestComponentBuilder) => {
+    it('should search when a term is set and search() is called', inject([TestComponentBuilder], (tcb:TestComponentBuilder) => {
       return tcb.createAsync(SearchComponent).then((fixture) => {
         let searchComponent = fixture.debugElement.componentInstance;
         searchComponent.query = 'M';
@@ -35,8 +39,7 @@ export function main() {
       });
     }));
 
-    it('should search automatically when a term is on the URL', injectAsync([TestComponentBuilder], (tcb:TestComponentBuilder) => {
-      mockRouterProvider.setRouteParam('term', 'peyton');
+    it('should search automatically when a term is on the URL', inject([TestComponentBuilder], (tcb:TestComponentBuilder) => {
       return tcb.createAsync(SearchComponent).then((fixture) => {
         fixture.detectChanges();
         expect(mockSearchService.searchSpy).toHaveBeenCalledWith('peyton');

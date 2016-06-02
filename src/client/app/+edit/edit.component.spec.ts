@@ -1,33 +1,36 @@
+import { provide } from '@angular/core';
+import { TestComponentBuilder } from '@angular/compiler/testing';
 import {
   it,
   describe,
   expect,
-  injectAsync,
+  inject,
   beforeEachProviders,
-  TestComponentBuilder,
-} from 'angular2/testing';
+} from '@angular/core/testing';
 
-import {MockRouterProvider} from '../../shared/services/mocks/routes';
-import {MockSearchService} from '../../shared/services/mocks/search.service';
+import { RouteSegment } from '@angular/router';
+import { ROUTER_FAKE_PROVIDERS } from '@angular/router/testing';
+import { MockRouteSegment } from '../shared/search/mocks/routes';
+import { MockSearchService } from '../shared/search/mocks/search.service';
 
-import {EditComponent} from './edit.component';
+import { EditComponent } from './edit.component';
 
 export function main() {
   describe('Edit component', () => {
     var mockSearchService:MockSearchService;
-    var mockRouterProvider:MockRouterProvider;
 
     beforeEachProviders(() => {
       mockSearchService = new MockSearchService();
-      mockRouterProvider = new MockRouterProvider();
 
       return [
-        mockSearchService.getProviders(), mockRouterProvider.getProviders()
+        mockSearchService.getProviders(),
+        ROUTER_FAKE_PROVIDERS,
+        EditComponent,
+        provide(RouteSegment, { useValue: new MockRouteSegment({ 'id': '1' }) })
       ];
     });
 
-    it('should fetch a single record', injectAsync([TestComponentBuilder], (tcb:TestComponentBuilder) => {
-      mockRouterProvider.setRouteParam('id', '1');
+    it('should fetch a single record', inject([TestComponentBuilder], (tcb:TestComponentBuilder) => {
       return tcb.createAsync(EditComponent).then((fixture) => {
         let person = {name: 'Emmanuel Sanders', address: {city: 'Denver'}};
         mockSearchService.setResponse(person);

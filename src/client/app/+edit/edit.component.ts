@@ -1,15 +1,14 @@
-import {Component, OnInit} from 'angular2/core';
-import {Person, Address, SearchService} from '../../shared/services/search.service';
-import {RouteParams, Router} from 'angular2/router';
-import {CanDeactivate, ComponentInstruction} from 'angular2/router';
+import {Component, OnInit} from '@angular/core';
+import {Person, Address, SearchService} from '../shared/search/search.service';
+import {RouteSegment, Router} from '@angular/router';
 
 @Component({
   selector: 'sd-edit',
   moduleId: module.id,
-  templateUrl: './edit.component.html',
-  styleUrls: ['./edit.component.css']
+  templateUrl: 'edit.component.html',
+  styleUrls: ['edit.component.css']
 })
-export class EditComponent implements OnInit, CanDeactivate {
+export class EditComponent implements OnInit {
 
   person: Person;
   editName: string;
@@ -19,11 +18,11 @@ export class EditComponent implements OnInit, CanDeactivate {
   constructor(
     private _service: SearchService,
     private _router: Router,
-    private _routeParams: RouteParams
+    private _routeSegment: RouteSegment
   ) { }
 
   ngOnInit() {
-    let id = +this._routeParams.get('id');
+    let id = +this._routeSegment.getParam('id');
     this._service.get(id).subscribe(person => {
       if (person) {
         this.editName = person.name;
@@ -36,17 +35,18 @@ export class EditComponent implements OnInit, CanDeactivate {
     });
   }
 
-  routerCanDeactivate(next: ComponentInstruction, prev: ComponentInstruction): any {
+  /* Not implemented in RC1: http://stackoverflow.com/a/37142394/65681
+  /*routerCanDeactivate(next: ComponentInstruction, prev: ComponentInstruction): any {
     if (!this.person || this.person.name === this.editName || this.person.phone === this.editPhone
       || this.person.address === this.editAddress) {
       return true;
     }
 
     return new Promise<boolean>((resolve, reject) => resolve(window.confirm('Discard changes?')));
-  }
+  }*/
 
   cancel() {
-    this._router.navigate(['Search']);
+    this._router.navigate(['/search']);
   }
 
   save() {
@@ -59,9 +59,9 @@ export class EditComponent implements OnInit, CanDeactivate {
 
   gotoList() {
     if (this.person) {
-      this._router.navigate(['Search', { term: this.person.name }]);
+      this._router.navigate(['/search', {term: this.person.name} ]);
     } else {
-      this._router.navigate(['Search']);
+      this._router.navigate(['/search']);
     }
   }
 }

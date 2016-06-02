@@ -1,5 +1,5 @@
 /**
- * This barrel file provides the export for the lazy loaded AboutComponent.
+ * This barrel file provides the export for the lazy loaded EditComponent.
  */
-export * from './about.component';
+export * from './edit.component';
 

@@ -1,13 +1,13 @@
-import {Component} from 'angular2/core';
-import {CORE_DIRECTIVES, FORM_DIRECTIVES} from 'angular2/common';
-import {ROUTER_DIRECTIVES, RouteParams} from 'angular2/router';
-import {Person, SearchService} from '../../shared/services/search.service';
+import {Component} from '@angular/core';
+import {CORE_DIRECTIVES, FORM_DIRECTIVES} from '@angular/common';
+import {ROUTER_DIRECTIVES, RouteSegment} from '@angular/router';
+import {Person, SearchService} from '../shared/search/search.service';
 
 @Component({
   selector: 'sd-search',
   moduleId: module.id,
-  templateUrl: './search.component.html',
-  styleUrls: ['./search.component.css'],
+  templateUrl: 'search.component.html',
+  styleUrls: ['search.component.css'],
   directives: [FORM_DIRECTIVES, CORE_DIRECTIVES, ROUTER_DIRECTIVES]
 })
 export class SearchComponent {
@@ -15,9 +15,15 @@ export class SearchComponent {
   query: string;
   searchResults: Array<Person>;
 
-  constructor(public searchService: SearchService, params: RouteParams) {
-    if (params.get('term')) {
-      this.query = decodeURIComponent(params.get('term'));
+  /*
+   routerOnActivate(curr: RouteSegment) {
+   this.userName = curr.getParam('userName');
+   this.projId = curr.getParam('projId');
+   }
+   */
+  constructor(public searchService: SearchService, routeSegment: RouteSegment) {
+    if (routeSegment.getParam('term')) {
+      this.query = decodeURIComponent(routeSegment.getParam('term'));
       this.search();
     }
   }

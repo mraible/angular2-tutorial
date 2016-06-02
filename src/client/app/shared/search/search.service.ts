@@ -1,12 +1,12 @@
-import {Injectable} from 'angular2/core';
-import {Http, Response} from 'angular2/http';
+import {Injectable} from '@angular/core';
+import {Http, Response} from '@angular/http';
 
 @Injectable()
 export class SearchService {
   constructor(private http:Http) {}
 
   getAll() {
-    return this.http.get('shared/data/people.json').map((res:Response) => res.json());
+    return this.http.get('app/shared/search/data/people.json').map((res:Response) => res.json());
   }
 
   search(q:string) {
@@ -16,7 +16,7 @@ export class SearchService {
       q = q.toLowerCase();
     }
     return this.getAll().map(data => {
-      let results = [];
+      let results:any = [];
       data.map(item => {
         // check for item in localStorage
         if (localStorage['person' + item.id]) {

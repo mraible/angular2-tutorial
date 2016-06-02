@@ -1,10 +1,16 @@
-import {it, describe, expect, inject, fakeAsync, beforeEachProviders, tick} from 'angular2/testing';
-import {MockBackend} from 'angular2/http/testing';
-import {provide} from 'angular2/core';
-import 'rxjs/add/operator/map';
-import {Http, ConnectionBackend, BaseRequestOptions, Response, ResponseOptions} from 'angular2/http';
-
-import {SearchService} from './search.service';
+import {
+  beforeEachProviders,
+  it,
+  describe,
+  expect,
+  inject,
+  fakeAsync,
+  tick
+} from '@angular/core/testing';
+import { MockBackend } from '@angular/http/testing';
+import { provide } from '@angular/core';
+import { Http, ConnectionBackend, BaseRequestOptions, Response, ResponseOptions } from '@angular/http';
+import { SearchService } from './search.service';
 
 export function main() {
   describe('Search Service', () => {
@@ -22,7 +28,7 @@ export function main() {
       inject([SearchService, MockBackend], fakeAsync((searchService:SearchService, mockBackend:MockBackend) => {
         var res:Response;
         mockBackend.connections.subscribe(c => {
-          expect(c.request.url).toBe('shared/data/people.json');
+          expect(c.request.url).toBe('app/shared/search/data/people.json');
           let response = new ResponseOptions({body: '[{"name": "John Elway"}, {"name": "Gary Kubiak"}]'});
           c.mockRespond(new Response(response));
         });
@@ -36,9 +42,9 @@ export function main() {
 
     it('should filter by search term',
       inject([SearchService, MockBackend], fakeAsync((searchService:SearchService, mockBackend:MockBackend) => {
-        var res:Response;
+        var res;
         mockBackend.connections.subscribe(c => {
-          expect(c.request.url).toBe('shared/data/people.json');
+          expect(c.request.url).toBe('app/shared/search/data/people.json');
           let response = new ResponseOptions({body: '[{"name": "John Elway"}, {"name": "Gary Kubiak"}]'});
           c.mockRespond(new Response(response));
         });
@@ -52,9 +58,9 @@ export function main() {
 
     it('should fetch by id',
       inject([SearchService, MockBackend], fakeAsync((searchService:SearchService, mockBackend:MockBackend) => {
-        var res:Response;
+        var res;
         mockBackend.connections.subscribe(c => {
-          expect(c.request.url).toBe('shared/data/people.json');
+          expect(c.request.url).toBe('app/shared/search/data/people.json');
           let response = new ResponseOptions({body: '[{"id": 1, "name": "John Elway"}, {"id": 2, "name": "Gary Kubiak"}]'});
           c.mockRespond(new Response(response));
         });
@@ -67,4 +73,3 @@ export function main() {
     );
   });
 }
-
