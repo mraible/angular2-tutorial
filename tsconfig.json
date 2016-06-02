@@ -18,8 +18,10 @@
   },
   "exclude": [
     "node_modules",
-    "typings/browser.d.ts",
-    "typings/browser/**"
+    "dist",
+    "typings/index.d.ts",
+    "typings/modules",
+    "src"
   ],
   "compileOnSave": false
 }
