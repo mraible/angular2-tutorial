@@ -9,7 +9,6 @@ import {
 } from '@angular/core/testing';
 
 import { RouteSegment } from '@angular/router';
-import { ROUTER_FAKE_PROVIDERS } from '@angular/router/testing';
 import { MockRouteSegment } from '../shared/search/mocks/routes';
 import { MockSearchService } from '../shared/search/mocks/search.service';
 
@@ -24,8 +23,6 @@ export function main() {
 
       return [
         mockSearchService.getProviders(),
-        ROUTER_FAKE_PROVIDERS,
-        SearchComponent,
         provide(RouteSegment, { useValue: new MockRouteSegment({ 'term': 'peyton' }) })
       ];
     });

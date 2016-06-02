@@ -25,7 +25,6 @@ export function main() {
       return [
         mockSearchService.getProviders(),
         ROUTER_FAKE_PROVIDERS,
-        EditComponent,
         provide(RouteSegment, { useValue: new MockRouteSegment({ 'id': '1' }) })
       ];
     });
