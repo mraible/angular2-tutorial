@@ -42,8 +42,6 @@ export class SpyObject {
       }
     }
   }
-  // Noop so that SpyObject has the same interface as in Dart
-  //noSuchMethod(args) {}
 
   spy(name) {
     if (!this[name]) {
