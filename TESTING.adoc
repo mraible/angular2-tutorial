@@ -220,7 +220,7 @@ Add a spec for the `EditComponent` as well, verifying fetching a single record w
 include::{sourcedir}/src/client/app/+edit/edit.component.spec.ts[]
 ----
 
-You should see "[green]#✔ 20 tests completed#" in the shell window that's running `npm run karma.start`. If you don't, try cancelling the command and restarting.
+You should see "[green]#✔ 22 tests completed#" in the shell window that's running `npm run karma.start`. If you don't, try cancelling the command and restarting.
 
 == Integration test the search UI
 
