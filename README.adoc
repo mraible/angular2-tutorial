@@ -492,7 +492,7 @@ The function calls a `gotoList()` function that appends the person's name to the
 [source,javascript]
 .src/client/app/+edit/edit.component.ts
 ----
-include::{sourcedir}/src/client/app/+search/edit.component.ts[lines=60..66]
+include::{sourcedir}/src/client/app/+edit/edit.component.ts[lines=60..66]
 ----
 
 Since the `SearchComponent` doesn't execute a search automatically when you execute this URL, add the following logic to do so in its constructor.

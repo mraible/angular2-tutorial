@@ -115,9 +115,9 @@ it('should retrieve all search results',
 Running `npm test` should result in "10 tests completed". Add a couple more tests for filtering by search term and fetching by id.
 
 [source,javascript]
-.src/shared/services/search.service.spec.ts
+.src/client/app/shared/search/search.service.spec.ts
 ----
-include::{sourcedir}/src/shared/services/search.service.spec.ts[lines=43..73]
+include::{sourcedir}/src/client/app/shared/search/search.service.spec.ts[lines=43..73]
 ----
 
 If you want to have tests continually run as you add them, you can run the following commands in separate shell windows.
@@ -257,7 +257,7 @@ Replace this test with the one below, and add a new one to verify the Search lin
 [source,javascript]
 .src/client/app/app.component.e2e-spec.ts
 ----
-include::{sourcedir}/src/app/components/app.component.e2e.ts[lines=19..25]
+include::{sourcedir}/src/client/app/app.component.e2e-spec.ts[lines=19..25]
 ----
 
 Now when you run `npm run e2e`, all specs should pass.
