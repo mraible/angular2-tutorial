@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
-import {Person, Address, SearchService} from '../shared/search/search.service';
-import {RouteSegment, Router} from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Person, Address, SearchService } from '../shared/search/search.service';
+import { RouteSegment, Router } from '@angular/router';
 
 @Component({
   selector: 'sd-edit',
