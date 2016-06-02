@@ -84,10 +84,10 @@ export function main() {
 }
 ----
 
-If you run `npm test`, you'll get a failed build from a number of unused imports. You can fix those by adding the first test of `getAll()`. This test shows how
+If you run `npm test`, all tests will pass, but you don't see "Search Service" as a listed test. You can fix this by adding the first test of `getAll()`. This test shows how
 `MockBackend` can be used to mock results and set the response.
 
-When you are testing code that returns either a Promise or an RxJS Observable, you can use the `fakeAsync` helper to test that code as if it were synchronous.
+TIP: When you are testing code that returns either a Promise or an RxJS Observable, you can use the `fakeAsync` helper to test that code as if it were synchronous.
 Promises are be fulfilled and Observables are notified immediately after you call `tick()`.
 
 The test below should be on the same level as `beforeEachProviders`.
@@ -112,7 +112,7 @@ it('should retrieve all search results',
 );
 ----
 
-Running `npm test` should result in "10 tests completed". Add a couple more tests for filtering by search term and fetching by id.
+Running `npm test` should result in "12 tests completed". Add a couple more tests for filtering by search term and fetching by id.
 
 [source,javascript]
 .src/client/app/shared/search/search.service.spec.ts
@@ -208,7 +208,7 @@ parameter.
 [source,javascript]
 .ssrc/client/app/+search/search.component.spec.ts
 ----
-include::{sourcedir}/src/client/app/+search/search.component.spec.ts[lines=33..47]
+include::{sourcedir}/src/client/app/+search/search.component.spec.ts[lines=30..44]
 ----
 
 Add a spec for the `EditComponent` as well, verifying fetching a single record works. Notice how you can access the component directly with
@@ -284,7 +284,30 @@ Create an `edit.component.e2e-spec.ts` spec to verify the `EditComponent` render
 include::{sourcedir}/src/client/app/+edit/edit.component.e2e-spec.ts[]
 ----
 
-Run `npm run e2e` to verify all your end-to-end tests pass. You should see a success message similar to the one below in your terminal window.
+Run `npm run e2e` to verify all your end-to-end tests pass. You might receive a failure for the "Home" test.
+
+[[protractor-home-error]]
+.Protractor Home error
+image::src/assets/images/protractor-home-error.png[Protractor home error, 800, scaledwidth="100%"]
+
+If you do, open `src/client/app/+home/home.component.e2e-spec.ts` and change line 17 from this:
+
+[source,javascript]
+.src/client/app/+home/home.component.e2e-spec.ts
+----
+element(by.css('sd-home form input')).sendKeys('Tim Berners-Lee');
+----
+
+To this:
+
+[source,javascript]
+.src/client/app/+home/home.component.e2e-spec.ts
+----
+let input = element(by.css('sd-home form input'));
+'Tim Berners-Lee'.split('').forEach((c) => input.sendKeys(c));
+----
+
+Run `npm run e2e` again. You should see a success message similar to the one below in your terminal window.
 
 [[protractor-success]]
 .Protractor success
