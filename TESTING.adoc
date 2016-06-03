@@ -352,7 +352,7 @@ Add two tests, one to verify a search term is used when it's set on the componen
 parameter.
 
 [source,javascript]
-.ssrc/client/app/+search/search.component.spec.ts
+.src/client/app/+search/search.component.spec.ts
 ----
 it('should search when a term is set and search() is called', inject([TestComponentBuilder], (tcb:TestComponentBuilder) => {
   return tcb.createAsync(SearchComponent).then((fixture) => {
