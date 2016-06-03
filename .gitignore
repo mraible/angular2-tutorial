@@ -36,10 +36,13 @@ build/Release
 *.iml
 
 /tools/**/*.js
-gulpfile.js
 dist
 dev
 docs
 lib
 test
 tmp
+
+gulpfile.js
+gulpfile.js.map
+

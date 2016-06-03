@@ -1,11 +1,14 @@
+import * as autoprefixer from 'autoprefixer';
+import * as cssnano from 'cssnano';
 import * as gulp from 'gulp';
 import * as gulpLoadPlugins from 'gulp-load-plugins';
 import * as merge from 'merge-stream';
-import * as autoprefixer from 'autoprefixer';
-import * as cssnano from 'cssnano';
-import {join} from 'path';
-import {APP_SRC, TMP_DIR, CSS_PROD_BUNDLE, CSS_DEST, APP_DEST, BROWSER_LIST, ENV, getEnvDependencies} from '../../config';
+import { join } from 'path';
+
+import { APP_DEST, APP_SRC, BROWSER_LIST, CSS_DEST, CSS_PROD_BUNDLE, DEPENDENCIES, ENV, getPluginConfig, TMP_DIR } from '../../config';
+
 const plugins = <any>gulpLoadPlugins();
+const cleanCss = require('gulp-clean-css');
 
 const processors = [
   autoprefixer({
@@ -18,16 +21,26 @@ const isProd = ENV === 'prod';
 if (isProd) {
   processors.push(
     cssnano({
-      discardComments: {removeAll: true}
+      discardComments: {removeAll: true},
+      discardUnused: false, // unsafe, see http://goo.gl/RtrzwF
+      zindex: false, // unsafe, see http://goo.gl/vZ4gbQ
+      reduceIdents: false // unsafe, see http://goo.gl/tNOPv0
     })
   );
 }
 
+/**
+ * Copies all HTML files in `src/client` over to the `dist/tmp` directory.
+ */
 function prepareTemplates() {
   return gulp.src(join(APP_SRC, '**', '*.html'))
     .pipe(gulp.dest(TMP_DIR));
 }
 
+/**
+ * Processes the CSS files within `src/client` excluding those in `src/client/assets` using `postcss` with the
+ * configured processors.
+ */
 function processComponentCss() {
   return gulp.src([
       join(APP_SRC, '**', '*.css'),
@@ -38,17 +51,26 @@ function processComponentCss() {
     .pipe(gulp.dest(isProd ? TMP_DIR: APP_DEST));
 }
 
+/**
+ * Processes the external CSS files using `postcss` with the configured processors.
+ */
 function processExternalCss() {
   return gulp.src(getExternalCss().map(r => r.src))
     .pipe(isProd ? plugins.cached('process-external-css') : plugins.util.noop())
     .pipe(plugins.postcss(processors))
-    .pipe(isProd ? plugins.concat(CSS_PROD_BUNDLE) : plugins.util.noop())
+    .pipe(isProd ? plugins.concatCss(CSS_PROD_BUNDLE, getPluginConfig('gulp-concat-css')) : plugins.util.noop())
+    .pipe(isProd ? cleanCss() : plugins.util.noop())
     .pipe(gulp.dest(CSS_DEST));
 }
 
+/**
+ * Returns the array of external CSS dependencies listed in the application configuration.
+ */
 function getExternalCss() {
-  return getEnvDependencies().filter(d => /\.css$/.test(d.src));
+  return DEPENDENCIES.filter(d => /\.css$/.test(d.src));
 }
 
-
+/**
+ * Executes the build process, processing the HTML and CSS files.
+ */
 export = () => merge(processComponentCss(), prepareTemplates(), processExternalCss());
