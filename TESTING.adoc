@@ -117,7 +117,37 @@ Running `npm test` should result in "12 tests completed". Add a couple more test
 [source,javascript]
 .src/client/app/shared/search/search.service.spec.ts
 ----
-include::{sourcedir}/src/client/app/shared/search/search.service.spec.ts[lines=43..73]
+it('should filter by search term',
+  inject([SearchService, MockBackend], fakeAsync((searchService:SearchService, mockBackend:MockBackend) => {
+    var res;
+    mockBackend.connections.subscribe(c => {
+      expect(c.request.url).toBe('app/shared/search/data/people.json');
+      let response = new ResponseOptions({body: '[{"name": "John Elway"}, {"name": "Gary Kubiak"}]'});
+      c.mockRespond(new Response(response));
+    });
+    searchService.search('john').subscribe((response) => {
+      res = response;
+    });
+    tick();
+    expect(res[0].name).toBe('John Elway');
+  }))
+);
+
+it('should fetch by id',
+  inject([SearchService, MockBackend], fakeAsync((searchService:SearchService, mockBackend:MockBackend) => {
+    var res;
+    mockBackend.connections.subscribe(c => {
+      expect(c.request.url).toBe('app/shared/search/data/people.json');
+      let response = new ResponseOptions({body: '[{"id": 1, "name": "John Elway"}, {"id": 2, "name": "Gary Kubiak"}]'});
+      c.mockRespond(new Response(response));
+    });
+    searchService.search('2').subscribe((response) => {
+      res = response;
+    });
+    tick();
+    expect(res[0].name).toBe('Gary Kubiak');
+  }))
+);
 ----
 
 If you want to have tests continually run as you add them, you can run the following commands in separate shell windows.
@@ -143,7 +173,41 @@ Create `src/client/app/shared/search/mocks/search.service.ts` and populate it wi
 [source,javascript]
 .src/client/app/shared/search/mocks/search.service.ts
 ----
-include::{sourcedir}/src/client/app/shared/search/mocks/search.service.ts[]
+import { provide } from '@angular/core';
+import { SpyObject } from './helper';
+
+import { SearchService } from '../search.service';
+import Spy = jasmine.Spy;
+
+export class MockSearchService extends SpyObject {
+  getAllSpy:Spy;
+  getByIdSpy:Spy;
+  searchSpy:Spy;
+  saveSpy:Spy;
+  fakeResponse:any;
+
+  constructor() {
+    super(SearchService);
+
+    this.fakeResponse = null;
+    this.getAllSpy = this.spy('getAll').andReturn(this);
+    this.getByIdSpy = this.spy('get').andReturn(this);
+    this.searchSpy = this.spy('search').andReturn(this);
+    this.saveSpy = this.spy('save').andReturn(this);
+  }
+
+  subscribe(callback:any) {
+    callback(this.fakeResponse);
+  }
+
+  setResponse(json:any):void {
+    this.fakeResponse = json;
+  }
+
+  getProviders():Array<any> {
+    return [provide(SearchService, {useValue: this})];
+  }
+}
 ----
 
 In this same directory, create a `helper.ts` class to implement the `SpyObject` that `MockSearchService` extends.
@@ -151,7 +215,71 @@ In this same directory, create a `helper.ts` class to implement the `SpyObject` 
 [source,javascript]
 .src/client/app/shared/search/mocks/helper.ts
 ----
-include::{sourcedir}/src/client/app/shared/search/mocks/helper.ts[]
+import {StringMapWrapper} from '@angular/core/src/facade/collection';
+
+export interface GuinessCompatibleSpy extends jasmine.Spy {
+  /** By chaining the spy with and.returnValue, all calls to the function will return a specific
+   * value. */
+  andReturn(val: any): void;
+  /** By chaining the spy with and.callFake, all calls to the spy will delegate to the supplied
+   * function. */
+  andCallFake(fn: Function): GuinessCompatibleSpy;
+  /** removes all recorded calls */
+  reset();
+}
+
+export class SpyObject {
+  static stub(object = null, config = null, overrides = null) {
+    if (!(object instanceof SpyObject)) {
+      overrides = config;
+      config = object;
+      object = new SpyObject();
+    }
+
+    var m = StringMapWrapper.merge(config, overrides);
+    StringMapWrapper.forEach(m, (value, key) => { object.spy(key).andReturn(value); });
+    return object;
+  }
+
+  constructor(type = null) {
+    if (type) {
+      for (var prop in type.prototype) {
+        var m = null;
+        try {
+          m = type.prototype[prop];
+        } catch (e) {
+          // As we are creating spys for abstract classes,
+          // these classes might have getters that throw when they are accessed.
+          // As we are only auto creating spys for methods, this
+          // should not matter.
+        }
+        if (typeof m === 'function') {
+          this.spy(prop);
+        }
+      }
+    }
+  }
+
+  spy(name) {
+    if (!this[name]) {
+      this[name] = this._createGuinnessCompatibleSpy(name);
+    }
+    return this[name];
+  }
+
+  prop(name, value) { this[name] = value; }
+
+  /** @internal */
+  _createGuinnessCompatibleSpy(name): GuinessCompatibleSpy {
+    var newSpy: GuinessCompatibleSpy = <any>jasmine.createSpy(name);
+    newSpy.andCallFake = <any>newSpy.and.callFake;
+    newSpy.andReturn = <any>newSpy.and.returnValue;
+    newSpy.reset = <any>newSpy.calls.reset;
+    // revisit return null here (previously needed for rtts_assert).
+    newSpy.and.returnValue(null);
+    return newSpy;
+  }
+}
 ----
 
 Alongside, create `routes.ts` to mock Angular's `RouteSegment`.
@@ -159,7 +287,25 @@ Alongside, create `routes.ts` to mock Angular's `RouteSegment`.
 [source,javascript]
 .src/client/app/shared/search/mocks/routes.ts
 ----
-include::{sourcedir}/src/client/app/shared/search/mocks/routes.ts[]
+import { RouteSegment } from '@angular/router';
+
+export class MockRouteSegment implements RouteSegment {
+  urlSegments:any;
+  parameters:any;
+  outlet:string;
+  _type:any;
+  _componentFactory:any;
+  type:any;
+  stringifiedUrlSegments:string;
+
+  constructor(parameters?:{ [key:string]:any; }) {
+    this.parameters = parameters;
+  }
+
+  getParam(param:string) {
+    return this.parameters[param];
+  }
+}
 ----
 
 With mocks in place, you can create a spec for `SearchComponent` that uses these as providers.
@@ -208,7 +354,21 @@ parameter.
 [source,javascript]
 .ssrc/client/app/+search/search.component.spec.ts
 ----
-include::{sourcedir}/src/client/app/+search/search.component.spec.ts[lines=30..44]
+it('should search when a term is set and search() is called', inject([TestComponentBuilder], (tcb:TestComponentBuilder) => {
+  return tcb.createAsync(SearchComponent).then((fixture) => {
+    let searchComponent = fixture.debugElement.componentInstance;
+    searchComponent.query = 'M';
+    searchComponent.search();
+    expect(mockSearchService.searchSpy).toHaveBeenCalledWith('M');
+  });
+}));
+
+it('should search automatically when a term is on the URL', inject([TestComponentBuilder], (tcb:TestComponentBuilder) => {
+  return tcb.createAsync(SearchComponent).then((fixture) => {
+    fixture.detectChanges();
+    expect(mockSearchService.searchSpy).toHaveBeenCalledWith('peyton');
+  });
+}));
 ----
 
 Add a spec for the `EditComponent` as well, verifying fetching a single record works. Notice how you can access the component directly with
@@ -217,7 +377,57 @@ Add a spec for the `EditComponent` as well, verifying fetching a single record w
 [source,javascript]
 .src/client/app/+edit/edit.component.spec.ts
 ----
-include::{sourcedir}/src/client/app/+edit/edit.component.spec.ts[]
+import { provide } from '@angular/core';
+import { TestComponentBuilder } from '@angular/compiler/testing';
+import {
+  it,
+  describe,
+  expect,
+  inject,
+  beforeEachProviders,
+} from '@angular/core/testing';
+
+import { RouteSegment } from '@angular/router';
+import { ROUTER_FAKE_PROVIDERS } from '@angular/router/testing';
+import { MockRouteSegment } from '../shared/search/mocks/routes';
+import { MockSearchService } from '../shared/search/mocks/search.service';
+
+import { EditComponent } from './edit.component';
+
+export function main() {
+  describe('Edit component', () => {
+    var mockSearchService:MockSearchService;
+
+    beforeEachProviders(() => {
+      mockSearchService = new MockSearchService();
+
+      return [
+        mockSearchService.getProviders(),
+        ROUTER_FAKE_PROVIDERS,
+        provide(RouteSegment, { useValue: new MockRouteSegment({ 'id': '1' }) })
+      ];
+    });
+
+    it('should fetch a single record', inject([TestComponentBuilder], (tcb:TestComponentBuilder) => {
+      return tcb.createAsync(EditComponent).then((fixture) => {
+        let person = {name: 'Emmanuel Sanders', address: {city: 'Denver'}};
+        mockSearchService.setResponse(person);
+
+        fixture.detectChanges();
+        // verify service was called
+        expect(mockSearchService.getByIdSpy).toHaveBeenCalledWith(1);
+
+        // verify data was set on component when initialized
+        let editComponent = fixture.debugElement.componentInstance;
+        expect(editComponent.editAddress.city).toBe('Denver');
+
+        // verify HTML renders as expected
+        var compiled = fixture.debugElement.nativeElement;
+        expect(compiled.querySelector('h3')).toHaveText('Emmanuel Sanders');
+      });
+    }));
+  });
+}
 ----
 
 You should see "[green]#✔ 22 tests completed#" in the shell window that's running `npm run karma.start`. If you don't, try cancelling the command and restarting.
@@ -257,7 +467,13 @@ Replace this test with the one below, and add a new one to verify the Search lin
 [source,javascript]
 .src/client/app/app.component.e2e-spec.ts
 ----
-include::{sourcedir}/src/client/app/app.component.e2e-spec.ts[lines=19..25]
+it('should have correct nav text for About', () => {
+  expect(element(by.css('sd-app sd-navbar nav a:nth-child(2)')).getText()).toEqual('ABOUT');
+});
+
+it('should have correct nav text for Search', () => {
+  expect(element(by.css('sd-app sd-navbar nav a:last-child')).getText()).toEqual('SEARCH');
+});
 ----
 
 Now when you run `npm run e2e`, all specs should pass.
@@ -271,7 +487,29 @@ verify the HTML renders as expected.
 [source,javascript]
 .src/client/app/+search/search.component.e2e-spec.ts
 ----
-include::{sourcedir}/src/client/app/+search/search.component.e2e-spec.ts[]
+describe('Search', () => {
+
+  beforeEach(() => {
+    browser.get('/search');
+  });
+
+  it('should have an input and search button', () => {
+    expect(element(by.css('sd-app sd-search form input')).isPresent()).toEqual(true);
+    expect(element(by.css('sd-app sd-search form button')).isPresent()).toEqual(true);
+  });
+
+  it('should allow searching', () => {
+    let searchButton = element(by.css('button'));
+    let searchBox = element(by.css('input'));
+    searchBox.sendKeys('M');
+    searchButton.click().then(() => {
+      // doesn't work as expected - results in 0
+      //expect(element.all(by.repeater('person of searchResults')).count()).toEqual(3);
+      var list = element.all(by.css('sd-search table tbody tr'));
+      expect(list.count()).toBe(3);
+    });
+  });
+});
 ----
 
 === Testing the edit feature
@@ -281,7 +519,34 @@ Create an `edit.component.e2e-spec.ts` spec to verify the `EditComponent` render
 [source,javascript]
 .src/client/app/+edit/edit.component.e2e-spec.ts
 ----
-include::{sourcedir}/src/client/app/+edit/edit.component.e2e-spec.ts[]
+describe('Edit', () => {
+
+  beforeEach(() => {
+    browser.get('/edit/1');
+  });
+
+  let name = element(by.id('name'));
+  let street = element(by.id('street'));
+  let city = element(by.id('city'));
+
+  it('should allow viewing a person', () => {
+    expect(element(by.css('h3')).getText()).toEqual('Peyton Manning');
+    expect(name.getAttribute('value')).toEqual('Peyton Manning');
+    expect(street.getAttribute('value')).toEqual('1234 Main Street');
+    expect(city.getAttribute('value')).toEqual('Greenwood Village');
+  });
+
+  it('should allow updating a name', function () {
+    let save = element(by.id('save'));
+    // send individual characters since sendKeys passes partial values sometimes
+    // https://github.com/angular/protractor/issues/698
+    ' Won!'.split('').forEach((c) => name.sendKeys(c));
+    save.click();
+    // verify one element matched this change
+    var list = element.all(by.css('sd-search table tbody tr'));
+    expect(list.count()).toBe(1);
+  });
+});
 ----
 
 Run `npm run e2e` to verify all your end-to-end tests pass. You might receive a failure for the "Home" test.

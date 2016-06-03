@@ -173,7 +173,10 @@ Create `src/client/app/+search/search.component.css` and add some CSS.
 [source,css]
 .src/client/app/+search/search.component.css
 ----
-include::{sourcedir}/src/client/app/+search/search.component.css[lines=1..4]
+:host {
+  display: block;
+  padding: 0 16px;
+}
 ----
 
 There, that looks better!
@@ -186,7 +189,11 @@ Finally, update `src/client/app/shared/navbar/navbar.component.html` to include 
 [source,xml]
 .src/client/app/shared/navbar/navbar.component.html
 ----
-include::{sourcedir}/src/client/app/shared/navbar/navbar.component.html[]
+<nav>
+  <a [routerLink]="['/']">HOME</a>
+  <a [routerLink]="['/about']">ABOUT</a>
+  <a [routerLink]="['/search']">SEARCH</a>
+</nav>
 ----
 
 This section has shown you how to add a new component to a basic Angular 2 application.
@@ -200,7 +207,41 @@ by creating `people.json` to hold your data.
 [source,json]
 .src/client/app/shared/search/data/people.json
 ----
-include::{sourcedir}/src/client/app/shared/search/data/people.json[]
+[
+  {
+    "id": 1,
+    "name": "Peyton Manning",
+    "phone": "(303) 567-8910",
+    "address": {
+      "street": "1234 Main Street",
+      "city": "Greenwood Village",
+      "state": "CO",
+      "zip": "80111"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Demaryius Thomas",
+    "phone": "(720) 213-9876",
+    "address": {
+      "street": "5555 Marion Street",
+      "city": "Denver",
+      "state": "CO",
+      "zip": "80202"
+    }
+  },
+  {
+    "id": 3,
+    "name": "Von Miller",
+    "phone": "(917) 323-2333",
+    "address": {
+      "street": "14 Mountain Way",
+      "city": "Vail",
+      "state": "CO",
+      "zip": "81657"
+    }
+  }
+]
 ----
 
 Create `src/client/app/shared/search/search.service.ts` and provide `Http` as a dependency in its constructor.
@@ -305,7 +346,14 @@ shared export.
 [source,javascript]
 .src/client/app/shared/index.ts
 ----
-include::{sourcedir}/src/client/app/shared/index.ts[]
+/**
+ * This barrel file provides the exports for the shared resources (services, components).
+ */
+export * from './name-list/index';
+export * from './navbar/index';
+export * from './toolbar/index';
+export * from './search/index';
+
 ----
 
 To fix the "No provider" error from above, update `app.component.ts` to import the `SearchService`
@@ -353,7 +401,21 @@ Then add some additional CSS for this component.
 [source,css]
 .src/client/app/+search/search.component.css
 ----
-include::{sourcedir}/src/client/app/+search/search.component.css[lines=6..20]
+table {
+  margin-top: 10px;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+  padding: 8px;
+}
+
+td {
+  border-top: 1px solid #ddd;
+  padding: 8px;
+}
 ----
 
 Now the search results look better.
@@ -390,7 +452,12 @@ Then refactor `SearchComponent` to call this method with its `query` variable.
 [source,javascript]
 .src/client/app/+search/search.component.ts
 ----
-include::{sourcedir}/src/client/app/+search/search.component.ts[lines=25..30]
+search(): void {
+  this.searchService.search(this.query).subscribe(
+    data => {this.searchResults = data;},
+    error => console.log(error)
+  );
+}
 ----
 
 Now search results will be filtered by the query value you type in.
@@ -404,7 +471,7 @@ Modify `search.component.html` to add a link for editing a person.
 [source,html]
 .src/client/app/+search/search.component.html
 ----
-include::{sourcedir}/src/client/app/+search/search.component.html[lines=18]
+<td><a [routerLink]="['/edit', person.id]">{{person.name}}</a></td>
 ----
 
 Create `src/client/app/+edit/edit.component.html` to display an editable form. You might notice I've added `id` attributes to most elements. This is to
@@ -413,7 +480,32 @@ make things easier when writing integration tests with Protractor.
 [source,html]
 .src/client/app/+edit/edit.component.html
 ----
-include::{sourcedir}/src/client/app/+edit/edit.component.html[]
+<div *ngIf="person">
+  <h3>{{editName}}</h3>
+  <div>
+    <label>Id:</label>
+    {{person.id}}
+  </div>
+  <div>
+    <label>Name:</label>
+    <input [(ngModel)]="editName" id="name" placeholder="name"/>
+  </div>
+  <div>
+    <label>Phone:</label>
+    <input [(ngModel)]="editPhone" id="phone" placeholder="Phone"/>
+  </div>
+  <fieldset>
+    <legend>Address:</legend>
+    <address>
+      <input [(ngModel)]="editAddress.street" id="street"><br/>
+      <input [(ngModel)]="editAddress.city" id="city">,
+      <input [(ngModel)]="editAddress.state" id="state" size="2">
+      <input [(ngModel)]="editAddress.zip" id="zip" size="5">
+    </address>
+  </fieldset>
+  <button (click)="save()" id="save">Save</button>
+  <button (click)="cancel()" id="cancel">Cancel</button>
+</div>
 ----
 
 Create an `EditComponent` that references this template and handles communication with the `SearchService`.
@@ -421,7 +513,73 @@ Create an `EditComponent` that references this template and handles communicatio
 [source,javascript]
 .src/client/app/+edit/edit.component.ts
 ----
-include::{sourcedir}/src/client/app/+edit/edit.component.ts[]
+import { Component, OnInit } from '@angular/core';
+import { Person, Address, SearchService } from '../shared/index';
+import { RouteSegment, Router } from '@angular/router';
+
+@Component({
+  selector: 'sd-edit',
+  moduleId: module.id,
+  templateUrl: 'edit.component.html',
+  styleUrls: ['edit.component.css']
+})
+export class EditComponent implements OnInit {
+
+  person: Person;
+  editName: string;
+  editPhone: string;
+  editAddress: Address;
+
+  constructor(
+    private _service: SearchService,
+    private _router: Router,
+    private _routeSegment: RouteSegment
+  ) { }
+
+  ngOnInit() {
+    let id = +this._routeSegment.getParam('id');
+    this._service.get(id).subscribe(person => {
+      if (person) {
+        this.editName = person.name;
+        this.editPhone = person.phone;
+        this.editAddress = person.address;
+        this.person = person;
+      } else {
+        this.gotoList();
+      }
+    });
+  }
+
+  /* Not implemented in RC1: http://stackoverflow.com/a/37142394/65681
+  /*routerCanDeactivate(next: ComponentInstruction, prev: ComponentInstruction): any {
+    if (!this.person || this.person.name === this.editName || this.person.phone === this.editPhone
+      || this.person.address === this.editAddress) {
+      return true;
+    }
+
+    return new Promise<boolean>((resolve, reject) => resolve(window.confirm('Discard changes?')));
+  }*/
+
+  cancel() {
+    this._router.navigate(['/search']);
+  }
+
+  save() {
+    this.person.name = this.editName;
+    this.person.phone = this.editPhone;
+    this.person.address = this.editAddress;
+    this._service.save(this.person);
+    this.gotoList();
+  }
+
+  gotoList() {
+    if (this.person) {
+      this._router.navigate(['/search', {term: this.person.name} ]);
+    } else {
+      this._router.navigate(['/search']);
+    }
+  }
+}
 ----
 
 Create `src/client/app/+edit/index.ts` to export `EditComponent`.
@@ -429,7 +587,7 @@ Create `src/client/app/+edit/index.ts` to export `EditComponent`.
 [source,javascript]
 ----
 /**
- * This barrel file provides the export for the lazy loaded SearchComponent.
+ * This barrel file provides the export for the lazy loaded EditComponent.
  */
 export * from './edit.component';
 ----
@@ -440,7 +598,39 @@ be aware of updated objects in `localStorage`.
 [source,javascript]
 .src/client/app/shared/search/search.service.ts
 ----
-include::{sourcedir}/src/client/app/shared/search/search.service.ts[lines=12..44]
+search(q:string) {
+  if (!q || q === '*') {
+    q = '';
+  } else {
+    q = q.toLowerCase();
+  }
+  return this.getAll().map(data => {
+    let results:any = [];
+    data.map(item => {
+      // check for item in localStorage
+      if (localStorage['person' + item.id]) {
+        item = JSON.parse(localStorage['person' + item.id]);
+      }
+      if (JSON.stringify(item).toLowerCase().includes(q)) {
+        results.push(item);
+      }
+    });
+    return results;
+  });
+}
+
+get(id: number) {
+  return this.getAll().map(all => {
+    if (localStorage['person' + id]) {
+      return JSON.parse(localStorage['person' + id]);
+    }
+    return all.find(e => e.id === id);
+  });
+}
+
+save(person: Person) {
+  localStorage['person' + person.id] = JSON.stringify(person);
+}
 ----
 
 To make the app are of this new component, add an import and route configuration in `app.component.ts`.
@@ -462,7 +652,14 @@ Then create `src/client/app/+edit/edit.component.css` to make the form look a bi
 [source,css]
 .src/client/app/+edit/edit.component.css
 ----
-include::{sourcedir}/src/client/app/+edit/edit.component.css[]
+:host {
+  display: block;
+  padding: 0 16px;
+}
+
+button {
+  margin-top: 10px;
+}
 ----
 
 At this point, you should be able to search for a person and update their information.
@@ -477,7 +674,13 @@ The function calls a `gotoList()` function that appends the person's name to the
 [source,javascript]
 .src/client/app/+edit/edit.component.ts
 ----
-include::{sourcedir}/src/client/app/+edit/edit.component.ts[lines=60..66]
+gotoList() {
+  if (this.person) {
+    this._router.navigate(['/search', {term: this.person.name} ]);
+  } else {
+    this._router.navigate(['/search']);
+  }
+}
 ----
 
 Since the `SearchComponent` doesn't execute a search automatically when you execute this URL, add the following logic to do so in its constructor.
@@ -485,12 +688,12 @@ Since the `SearchComponent` doesn't execute a search automatically when you exec
 [source,javascript]
 .src/client/app/+search/search.component.ts
 ----
-  constructor(public searchService: SearchService, routeSegment: RouteSegment) {
-    if (routeSegment.getParam('term')) {
-      this.query = decodeURIComponent(routeSegment.getParam('term'));
-      this.search();
-    }
+constructor(public searchService: SearchService, routeSegment: RouteSegment) {
+  if (routeSegment.getParam('term')) {
+    this.query = decodeURIComponent(routeSegment.getParam('term'));
+    this.search();
   }
+}
 ----
 
 You'll need to import `RouteSegment` in order for everything to compile.
