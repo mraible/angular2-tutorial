@@ -584,9 +584,40 @@ A completed project with this code is available on GitHub at https://github.com/
 
 == Continuous Integration
 
-The angular2-seed project ships with a `.travis.yml` that you can use to run continous integration for this tutorial
-through https://travis-ci.org/[Travis CI]. To enable builds on Travis CI, go to your account and enable builds for the
+The angular2-seed project ships with a `.travis.yml` that you can use to run continuous integration for this application
+through https://travis-ci.org/[Travis CI]. To enable builds on Travis CI, login and enable builds for the
 GitHub repo you created the project in. Then trigger your first build with a `git push`.
+
+When I first tried this, I received a https://travis-ci.org/mraible/angular2-tutorial/jobs/135517549#L1189[failure] because
+Protractor on Travis CI is https://github.com/mgechev/angular2-seed/issues/970[unable to navigate directly]
+to the search and edit components. I was able to workaround this by modifying `search.component.e2e-spec.ts` to start
+at the top and navigate to the component.
+
+[source,javascript]
+.src/client/app/+search/search.component.e2e-spec.ts
+----
+beforeEach(() => {
+  browser.get('/');
+  element(by.linkText('SEARCH')).click();
+});
+----
+
+I did something similar with `edit.component.e2e-spec.ts`:
+
+[source,javascript]
+.src/client/app/+edit/edit.component.e2e-spec.ts
+----
+beforeEach(() => {
+  browser.get('/');
+  element(by.linkText('SEARCH')).click();
+  let search = element(by.css('sd-search form input'));
+  'Man'.split('').forEach((c) => search.sendKeys(c));
+  element(by.css('sd-search form button')).click();
+  element(by.linkText('Peyton Manning')).click();
+});
+----
+
+After making these changes, https://travis-ci.org/mraible/angular2-tutorial/builds/135598015[all e2e tests passed in Travis CI].
 
 == Summary
 
