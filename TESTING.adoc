@@ -582,6 +582,12 @@ You're well on your way to writing quality code with Angular 2 and verifying it 
 
 A completed project with this code is available on GitHub at https://github.com/mraible/angular2-tutorial.
 
+== Continuous Integration
+
+The angular2-seed project ships with a `.travis.yml` that you can use to run continous integration for this tutorial
+through https://travis-ci.org/[Travis CI]. To enable builds on Travis CI, go to your account and enable builds for the
+GitHub repo you created the project in. Then trigger your first build with a `git push`.
+
 == Summary
 
 I hope you've enjoyed this quick-and-easy tutorial on testing Angular 2 applications. You can see the test coverage of your project by running
