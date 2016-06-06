@@ -1,7 +1,8 @@
 describe('Search', () => {
 
   beforeEach(() => {
-    browser.get('/search');
+    browser.get('/');
+    element(by.linkText('SEARCH')).click();
   });
 
   it('should have an input and search button', () => {
