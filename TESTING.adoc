@@ -36,11 +36,13 @@ This manual testing will take longer and longer as your codebase grows.
 
 == Get the tutorial project
 
-Clone the https://github.com/mraible/angular2-tutorial[angular2-tutorial repository] using git and install its dependencies.
+Clone the https://github.com/mraible/angular2-tutorial[angular2-tutorial repository] using git, checkout the `testing-start` branch
+and install its dependencies.
 
 ----
 git clone https://github.com/mraible/angular2-tutorial.git
 cd angular2-tutorial
+git checkout testing-start
 npm install
 ----
 
