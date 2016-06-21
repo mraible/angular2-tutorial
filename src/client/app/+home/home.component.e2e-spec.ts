@@ -14,8 +14,7 @@ describe('Home', () => {
   });
 
   it('should add a name to the list using the form', () => {
-    let input = element(by.css('sd-home form input'));
-    'Tim Berners-Lee'.split('').forEach((c) => input.sendKeys(c));
+    element(by.css('sd-home form input')).sendKeys('Tim Berners-Lee');
     element(by.css('sd-home form button')).click();
 
     expect(element(by.css('sd-home ul')).getText())
