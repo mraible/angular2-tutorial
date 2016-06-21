@@ -632,7 +632,7 @@ save(person: Person) {
 }
 ----
 
-To make the app are of this new component, add an import and route configuration in `app.component.ts`.
+To make the app aware of this new component, add an import and route configuration in `app.component.ts`.
 
 [source,javascript]
 ----
